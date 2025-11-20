@@ -1,66 +1,82 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import styles from './Home.module.css';
 
 export default function Home() {
+  const router = useRouter();
+  const [location, setLocation] = useState('');
+  const [type, setType] = useState('Any');
+  const [concern, setConcern] = useState('Any');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (location) params.append('location', location);
+    if (type !== 'Any') params.append('type', type);
+    if (concern !== 'Any') params.append('concern', concern);
+
+    router.push(`/search?${params.toString()}`);
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className={styles.hero}>
+      <h1 className={styles.title}>Find Your Perfect Match</h1>
+      <p className={styles.subtitle}>
+        Connect with professional therapists who understand your needs and can help you thrive.
+      </p>
+
+      <form className={styles.searchContainer} onSubmit={handleSearch}>
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="location">Location</label>
+          <input
+            id="location"
+            className={styles.input}
+            type="text"
+            placeholder="e.g. London, UK"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+          />
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="type">Type</label>
+          <select
+            id="type"
+            className={styles.select}
+            value={type}
+            onChange={(e) => setType(e.target.value)}
           >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <option value="Any">Any</option>
+            <option value="Remote">Remote</option>
+            <option value="In-person">In-person</option>
+            <option value="Both">Both</option>
+          </select>
         </div>
-      </main>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label} htmlFor="concern">Concern</label>
+          <select
+            id="concern"
+            className={styles.select}
+            value={concern}
+            onChange={(e) => setConcern(e.target.value)}
+          >
+            <option value="Any">Any</option>
+            <option value="Anxiety">Anxiety</option>
+            <option value="Stress">Stress</option>
+            <option value="Depression">Depression</option>
+            <option value="Relationships">Relationships</option>
+            <option value="Trauma">Trauma</option>
+            <option value="Career Counseling">Career Counseling</option>
+          </select>
+        </div>
+
+        <button type="submit" className={`btn btn-primary ${styles.searchButton}`}>
+          Search
+        </button>
+      </form>
     </div>
   );
 }
