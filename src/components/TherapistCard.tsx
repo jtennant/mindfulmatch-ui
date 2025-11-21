@@ -1,121 +1,110 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Therapist } from '@/lib/data';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 
-interface TherapistCardProps {
+interface Props {
     therapist: Therapist;
 }
 
-export default function TherapistCard({ therapist }: TherapistCardProps) {
+export default function TherapistCard({ therapist }: Props) {
     return (
-        <Link href={`/therapist/${therapist.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-            <div style={{
+        <Link href={`/therapist/${therapist.id}`} style={{ textDecoration: 'none' }}>
+            <Card sx={{
                 display: 'flex',
-                backgroundColor: 'var(--card-bg)',
-                borderRadius: 'var(--border-radius)',
-                boxShadow: 'var(--shadow-md)',
-                overflow: 'hidden',
-                marginBottom: 'var(--spacing-md)',
-                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                border: '1px solid rgba(0,0,0,0.05)',
-                cursor: 'pointer'
-            }}
-                className="therapist-card"
-                onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-                }}
-                onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
-                }}
-            >
-                <div style={{ position: 'relative', width: '200px', minWidth: '200px', height: 'auto' }}>
-                    <Image
-                        src={therapist.imageUrl}
-                        alt={therapist.name}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                    />
-                </div>
-                <div style={{ padding: 'var(--spacing-md)', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-xs)' }}>
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-main)' }}>{therapist.name}</h3>
+                flexDirection: { xs: 'column', sm: 'row' },
+                height: '100%',
+                transition: 'transform 0.2s, box-shadow 0.2s',
+                '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 6
+                }
+            }}>
+                <CardMedia
+                    component="img"
+                    sx={{ width: { xs: '100%', sm: 200 }, height: { xs: 200, sm: 'auto' } }}
+                    image={therapist.imageUrl}
+                    alt={therapist.name}
+                />
+                <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column', p: 3 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                        <Box>
+                            <Stack direction="row" spacing={1} alignItems="center" mb={0.5}>
+                                <Typography variant="h6" component="h3" fontWeight="bold" color="text.primary">
+                                    {therapist.name}
+                                </Typography>
                                 {therapist.tier === 'Premium' && (
-                                    <span style={{
-                                        backgroundColor: '#FFD700',
-                                        color: '#856404',
-                                        padding: '2px 6px',
-                                        borderRadius: '4px',
-                                        fontSize: '0.65rem',
-                                        fontWeight: '800',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.5px'
-                                    }}>
-                                        Premium
-                                    </span>
+                                    <Chip
+                                        label="PREMIUM"
+                                        size="small"
+                                        sx={{
+                                            bgcolor: '#FFD700',
+                                            color: '#856404',
+                                            fontWeight: 800,
+                                            height: 20,
+                                            fontSize: '0.65rem'
+                                        }}
+                                    />
                                 )}
-                            </div>
-                            <p style={{ fontSize: '0.875rem', color: 'var(--primary-color)', fontWeight: '600' }}>{therapist.title}</p>
-                        </div>
-                        <span style={{
-                            backgroundColor: 'rgba(94, 156, 160, 0.1)',
-                            color: 'var(--secondary-color)',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600'
-                        }}>
-                            {therapist.type}
-                        </span>
-                    </div>
+                            </Stack>
+                            <Typography variant="subtitle2" color="primary.main" fontWeight={600}>
+                                {therapist.title}
+                            </Typography>
+                        </Box>
+                        <Chip
+                            label={therapist.type}
+                            size="small"
+                            sx={{
+                                bgcolor: 'rgba(94, 156, 160, 0.1)',
+                                color: 'secondary.main',
+                                fontWeight: 600
+                            }}
+                        />
+                    </Box>
 
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', marginBottom: 'var(--spacing-sm)', lineHeight: '1.5' }}>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2, flex: 1 }}>
                         {therapist.bio}
-                    </p>
+                    </Typography>
 
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: 'var(--spacing-sm)' }}>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
                         {therapist.specialties.map((specialty, index) => (
-                            <span key={index} style={{
-                                fontSize: '0.75rem',
-                                color: 'var(--text-light)',
-                                backgroundColor: '#f3f4f6',
-                                padding: '2px 8px',
-                                borderRadius: '4px'
-                            }}>
-                                {specialty}
-                            </span>
+                            <Chip
+                                key={index}
+                                label={specialty}
+                                size="small"
+                                sx={{ bgcolor: '#f3f4f6' }}
+                            />
                         ))}
-                    </div>
+                    </Stack>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 'var(--spacing-sm)', borderTop: '1px solid #f3f4f6' }}>
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                                <span style={{ fontWeight: '600', color: 'var(--text-main)' }}>£{therapist.hourlyRate}</span> / hr
-                            </span>
-                            <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto', pt: 2, borderTop: '1px solid #f3f4f6' }}>
+                        <Box>
+                            <Typography variant="body2" color="text.secondary">
+                                <Box component="span" fontWeight="bold" color="text.primary">£{therapist.hourlyRate}</Box> / hr
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
                                 📍 {therapist.location}
-                            </span>
-                        </div>
+                            </Typography>
+                        </Box>
                         {therapist.onlineBooking && (
-                            <span style={{
-                                backgroundColor: 'var(--accent-color)',
-                                color: 'white',
-                                padding: '6px 12px',
-                                borderRadius: '6px',
-                                fontSize: '0.875rem',
-                                fontWeight: '600',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '4px'
-                            }}>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                sx={{ color: 'white', fontWeight: 600 }}
+                            >
                                 📅 Book Now
-                            </span>
+                            </Button>
                         )}
-                    </div>
-                </div>            </div>
+                    </Box>
+                </CardContent>
+            </Card>
         </Link>
     );
 }
