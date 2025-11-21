@@ -23,7 +23,7 @@ export default function Home() {
     if (location) params.append('location', location);
     if (type) params.append('type', type);
     if (concern) params.append('concern', concern);
-    router.push(`/search?${params.toString()}`);
+    router.push(`/search/results?${params.toString()}`);
   };
 
   return (

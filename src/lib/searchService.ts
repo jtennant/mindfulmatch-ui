@@ -4,6 +4,7 @@ export interface SearchQuery {
     location?: string;
     type?: string;
     concern?: string;
+    distance?: number;
 }
 
 export async function searchTherapists(query: SearchQuery): Promise<Therapist[]> {
