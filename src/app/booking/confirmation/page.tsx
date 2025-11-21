@@ -1,19 +1,21 @@
-'use client';
-
-import { useSearchParams } from 'next/navigation';
 import { MOCK_THERAPISTS } from '@/lib/data';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 
-export default function BookingConfirmationPage() {
-    const searchParams = useSearchParams();
+interface PageProps {
+    searchParams: Promise<{
+        therapistId?: string;
+        date?: string;
+        slot?: string;
+        transactionId?: string;
+    }>;
+}
 
-    const therapistId = searchParams.get('therapistId');
-    const date = searchParams.get('date');
-    const slot = searchParams.get('slot');
-    const transactionId = searchParams.get('transactionId');
+export default async function BookingConfirmationPage({ searchParams }: PageProps) {
+    const params = await searchParams;
+    const { therapistId, date, slot, transactionId } = params;
 
-    const therapist = MOCK_THERAPISTS.find(t => t.id === therapistId);
+    const therapist = therapistId ? MOCK_THERAPISTS.find(t => t.id === therapistId) : null;
     const bookingDate = date ? dayjs(date) : null;
     const bookingSlot = slot ? dayjs(slot) : null;
 

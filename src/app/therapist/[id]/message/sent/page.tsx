@@ -1,7 +1,6 @@
 'use client';
 
 import { use } from 'react';
-import { useSearchParams } from 'next/navigation';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -12,12 +11,15 @@ import Stack from '@mui/material/Stack';
 
 interface Props {
     params: Promise<{ id: string }>;
+    searchParams: Promise<{
+        accountCreated?: string;
+    }>;
 }
 
-export default function MessageSentPage({ params }: Props) {
+export default function MessageSentPage({ params, searchParams }: Props) {
     const { id } = use(params);
-    const searchParams = useSearchParams();
-    const accountCreated = searchParams.get('accountCreated') === 'true';
+    const search = use(searchParams);
+    const accountCreated = search.accountCreated === 'true';
 
     return (
         <Container maxWidth="sm" sx={{ py: 8 }}>

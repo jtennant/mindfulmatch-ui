@@ -1,17 +1,23 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useState, use } from 'react';
+import { useRouter } from 'next/navigation';
 import { paymentService } from '@/services/paymentService';
 import Link from 'next/link';
 
-export default function PaymentPage() {
-    const searchParams = useSearchParams();
+interface PageProps {
+    searchParams: Promise<{
+        therapistId?: string;
+        date?: string;
+        slot?: string;
+    }>;
+}
+
+export default function PaymentPage({ searchParams }: PageProps) {
+    const params = use(searchParams);
     const router = useRouter();
 
-    const therapistId = searchParams.get('therapistId');
-    const date = searchParams.get('date');
-    const slot = searchParams.get('slot');
+    const { therapistId, date, slot } = params;
 
     const [cardNumber, setCardNumber] = useState('');
     const [expiryDate, setExpiryDate] = useState('');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
@@ -11,7 +11,14 @@ import Paper from '@mui/material/Paper';
 import Alert from '@mui/material/Alert';
 import { useAuth } from '@/context/AuthContext';
 
-export default function LoginPage() {
+interface PageProps {
+    searchParams: Promise<{
+        redirect?: string;
+    }>;
+}
+
+export default function LoginPage({ searchParams }: PageProps) {
+    const params = use(searchParams);
     const router = useRouter();
     const { login } = useAuth();
     const [email, setEmail] = useState('');
@@ -28,8 +35,7 @@ export default function LoginPage() {
             const success = await login(email);
 
             if (success) {
-                const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
-                router.push(redirectUrl || '/dashboard');
+                router.push(params.redirect || '/dashboard');
             } else {
                 setError('Invalid email address. Try therapist@example.com or client@example.com');
             }

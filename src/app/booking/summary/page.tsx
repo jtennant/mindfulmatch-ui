@@ -1,19 +1,26 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
+import { use } from 'react';
+import { useRouter } from 'next/navigation';
 import { MOCK_THERAPISTS } from '@/lib/data';
 import dayjs from 'dayjs';
 import Link from 'next/link';
 
-export default function BookingSummaryPage() {
-    const searchParams = useSearchParams();
+interface PageProps {
+    searchParams: Promise<{
+        therapistId?: string;
+        date?: string;
+        slot?: string;
+    }>;
+}
+
+export default function BookingSummaryPage({ searchParams }: PageProps) {
+    const params = use(searchParams);
     const router = useRouter();
 
-    const therapistId = searchParams.get('therapistId');
-    const date = searchParams.get('date');
-    const slot = searchParams.get('slot');
+    const { therapistId, date, slot } = params;
 
-    const therapist = MOCK_THERAPISTS.find(t => t.id === therapistId);
+    const therapist = therapistId ? MOCK_THERAPISTS.find(t => t.id === therapistId) : null;
     const bookingDate = date ? dayjs(date) : null;
     const bookingSlot = slot ? dayjs(slot) : null;
 
