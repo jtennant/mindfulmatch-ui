@@ -9,10 +9,11 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Alert from '@mui/material/Alert';
-import { login } from '@/lib/userService';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -24,12 +25,11 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const user = await login(email);
+            const success = await login(email);
 
-            if (user) {
-                // Stubbed session management
-                localStorage.setItem('user_email', user.email);
-                router.push('/dashboard');
+            if (success) {
+                const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+                router.push(redirectUrl || '/dashboard');
             } else {
                 setError('Invalid email address. Try therapist@example.com or client@example.com');
             }

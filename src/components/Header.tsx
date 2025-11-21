@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -12,9 +13,12 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Header() {
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+    const { user, logout } = useAuth();
+    const router = useRouter();
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -22,6 +26,12 @@ export default function Header() {
 
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
+    };
+
+    const handleLogout = () => {
+        logout();
+        handleCloseNavMenu();
+        router.push('/');
     };
 
     const navLinks = [
@@ -60,11 +70,22 @@ export default function Header() {
                         ))}
                     </Box>
 
-                    {/* Desktop Login Button */}
-                    <Box sx={{ display: { xs: 'none', md: 'flex' }, marginLeft: 'auto' }}>
-                        <Button component={Link} href="/login" variant="outlined" color="primary">
-                            Login
-                        </Button>
+                    {/* Desktop Login/User Buttons */}
+                    <Box sx={{ display: { xs: 'none', md: 'flex' }, marginLeft: 'auto', gap: 2 }}>
+                        {user ? (
+                            <>
+                                <Button component={Link} href="/dashboard" variant="contained" color="primary">
+                                    My Dashboard
+                                </Button>
+                                <Button onClick={handleLogout} variant="outlined" color="error">
+                                    Sign Out
+                                </Button>
+                            </>
+                        ) : (
+                            <Button component={Link} href="/login" variant="outlined" color="primary">
+                                Login
+                            </Button>
+                        )}
                     </Box>
 
                     {/* Mobile Menu Icon */}
@@ -102,9 +123,20 @@ export default function Header() {
                                     <Typography textAlign="center">{link.title}</Typography>
                                 </MenuItem>
                             ))}
-                            <MenuItem onClick={handleCloseNavMenu} component={Link} href="/login">
-                                <Typography textAlign="center" color="primary" fontWeight="bold">Login</Typography>
-                            </MenuItem>
+                            {user ? (
+                                [
+                                    <MenuItem key="dashboard" onClick={handleCloseNavMenu} component={Link} href="/dashboard">
+                                        <Typography textAlign="center" color="primary" fontWeight="bold">My Dashboard</Typography>
+                                    </MenuItem>,
+                                    <MenuItem key="logout" onClick={handleLogout}>
+                                        <Typography textAlign="center" color="primary">Sign Out</Typography>
+                                    </MenuItem>
+                                ]
+                            ) : (
+                                <MenuItem onClick={handleCloseNavMenu} component={Link} href="/login">
+                                    <Typography textAlign="center" color="primary" fontWeight="bold">Login</Typography>
+                                </MenuItem>
+                            )}
                         </Menu>
                     </Box>
                 </Toolbar>
@@ -112,3 +144,4 @@ export default function Header() {
         </AppBar>
     );
 }
+

@@ -4,6 +4,7 @@ import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry/ThemeRegistry";
 import Header from "@/components/Header";
 import Box from '@mui/material/Box';
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,10 +22,12 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThemeRegistry>
-          <Header />
-          <Box component="main" sx={{ minHeight: 'calc(100vh - 64px)' }}>
-            {children}
-          </Box>
+          <AuthProvider>
+            <Header />
+            <Box component="main" sx={{ minHeight: 'calc(100vh - 64px)' }}>
+              {children}
+            </Box>
+          </AuthProvider>
         </ThemeRegistry>
       </body>
     </html>

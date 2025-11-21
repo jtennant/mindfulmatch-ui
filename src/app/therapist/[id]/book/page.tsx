@@ -8,10 +8,12 @@ import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import dayjs, { Dayjs } from 'dayjs';
 import { MOCK_THERAPISTS } from '@/lib/data';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
 
 export default function BookingPage() {
     const params = useParams();
     const router = useRouter();
+    const { user } = useAuth();
     const id = params.id as string;
     const therapist = MOCK_THERAPISTS.find(t => t.id === id);
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
@@ -33,6 +35,24 @@ export default function BookingPage() {
     const slotsForDate = selectedDate
         ? availableSlots.filter(slot => slot.isSame(selectedDate, 'day')).sort((a, b) => a.valueOf() - b.valueOf())
         : [];
+
+    const handleContinue = () => {
+        if (!selectedSlot || !selectedDate) return;
+
+        const bookingParams = new URLSearchParams({
+            therapistId: id,
+            date: selectedDate.toISOString(),
+            slot: selectedSlot
+        });
+
+        const targetUrl = `/booking/summary?${bookingParams.toString()}`;
+
+        if (user) {
+            router.push(targetUrl);
+        } else {
+            router.push(`/login?redirect=${encodeURIComponent(targetUrl)}`);
+        }
+    };
 
     return (
         <main style={{ maxWidth: '800px', margin: '0 auto', padding: 'var(--spacing-lg)' }}>
@@ -94,19 +114,22 @@ export default function BookingPage() {
 
                     {selectedSlot && (
                         <div style={{ marginTop: 'var(--spacing-lg)' }}>
-                            <button style={{
-                                width: '100%',
-                                padding: '12px',
-                                backgroundColor: 'var(--primary-color)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '1rem',
-                                fontWeight: '700',
-                                cursor: 'not-allowed', // Disabled as per requirements
-                                opacity: 0.7
-                            }} disabled>
-                                Continue to Payment (Coming Soon)
+                            <button
+                                onClick={handleContinue}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    backgroundColor: 'var(--primary-color)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    fontSize: '1rem',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    transition: 'opacity 0.2s'
+                                }}
+                            >
+                                Continue
                             </button>
                         </div>
                     )}
