@@ -2,21 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Container from '@mui/material/Container';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
+import { Grid } from '@mui/material';
+import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import { getUser, User } from '@/lib/userService';
+import { getDashboardData, DashboardData } from '@/services/dashboardService';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import StatBox from '@/components/dashboard/widgets/StatBox';
+import ImpressionGraph from '@/components/dashboard/widgets/ImpressionGraph';
+import ActivityFeed from '@/components/dashboard/widgets/ActivityFeed';
+import SessionList from '@/components/dashboard/widgets/SessionList';
 
 export default function DashboardPage() {
     const router = useRouter();
     const [user, setUser] = useState<User | null>(null);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const checkUser = async () => {
+        const checkUserAndFetchData = async () => {
             const email = localStorage.getItem('user_email');
             if (!email) {
                 router.push('/login');
@@ -31,57 +36,82 @@ export default function DashboardPage() {
             }
 
             setUser(userData);
-            setLoading(false);
+
+            // Fetch dashboard data
+            try {
+                const data = await getDashboardData(userData);
+                setDashboardData(data);
+            } catch (error) {
+                console.error("Failed to fetch dashboard data", error);
+            } finally {
+                setLoading(false);
+            }
         };
 
-        checkUser();
+        checkUserAndFetchData();
     }, [router]);
 
-    const handleLogout = () => {
-        localStorage.removeItem('user_email');
-        router.push('/login');
-    };
-
-    if (loading) {
+    if (loading || !user || !dashboardData) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
                 <CircularProgress />
             </Box>
         );
     }
 
+    const isProfessional = user.role === 'professional';
+
     return (
-        <Container maxWidth="md" sx={{ py: 8 }}>
-            <Paper elevation={3} sx={{ p: 5, borderRadius: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                    <Typography variant="h4" component="h1" fontWeight="bold">
-                        Dashboard
-                    </Typography>
-                    <Button variant="outlined" color="primary" onClick={handleLogout}>
-                        Sign Out
-                    </Button>
-                </Box>
+        <DashboardLayout user={user}>
+            <Typography variant="h4" gutterBottom fontWeight="bold">
+                Welcome back, {user.name}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                Here's what's happening with your account today.
+            </Typography>
 
-                <Box sx={{ mb: 4 }}>
-                    <Typography variant="h5" gutterBottom>
-                        Welcome, {user?.name}
-                    </Typography>
-                    <Typography variant="body1" color="text.secondary">
-                        You are logged in as a <strong>{user?.role === 'professional' ? 'Professional' : 'Client'}</strong>.
-                    </Typography>
-                </Box>
+            <Grid container spacing={3}>
+                {/* Professional Only Widgets */}
+                {isProfessional && (
+                    <>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                            <StatBox title="Upcoming Appointments (7 Days)" value={dashboardData.stats.appointments7Days} />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                            <StatBox title="Upcoming Appointments (30 Days)" value={dashboardData.stats.appointments30Days} />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                            <StatBox title="Earnings (30 Days)" value={dashboardData.stats.earnings30Days} />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 8 }}>
+                            <ImpressionGraph data={dashboardData.impressions} />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                            <SessionList
+                                title="Upcoming Supervisor Sessions"
+                                sessions={dashboardData.sessions.filter(s => s.type === 'Supervisor')}
+                            />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                            <SessionList
+                                title="Upcoming Client Sessions"
+                                sessions={dashboardData.sessions.filter(s => s.type === 'Client')}
+                            />
+                        </Grid>
+                    </>
+                )}
 
-                <Box sx={{ p: 3, bgcolor: 'grey.50', borderRadius: 1 }}>
-                    <Typography variant="h6" gutterBottom>
-                        {user?.role === 'professional' ? 'Professional Workspace' : 'Client Portal'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {user?.role === 'professional'
-                            ? 'Here you will be able to manage your profile, view appointments, and communicate with clients.'
-                            : 'Here you will be able to search for therapists, manage your appointments, and view your history.'}
-                    </Typography>
-                </Box>
-            </Paper>
-        </Container>
+                {/* Common Widgets */}
+                <Grid size={{ xs: 12, md: isProfessional ? 6 : 8 }}>
+                    <ActivityFeed activities={dashboardData.activities} />
+                </Grid>
+                <Grid size={{ xs: 12, md: 4 }}>
+                    <SessionList
+                        title="Your Therapy Sessions"
+                        sessions={dashboardData.sessions.filter(s => s.type === 'Therapy')}
+                    />
+                </Grid>
+            </Grid>
+        </DashboardLayout>
     );
 }
